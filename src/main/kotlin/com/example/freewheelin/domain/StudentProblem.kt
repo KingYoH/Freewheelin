@@ -7,7 +7,7 @@ import jakarta.persistence.*
     name = "Student_Problem",
     indexes = [
         Index(name = "idx_student_problem_piece_student_id", columnList = "piece_student_id"),
-        Index(name = "idx_student_problem_problem_id", columnList = "problem_id"),
+        Index(name = "idx_student_problem_problem_id", columnList = "piece_problem_id"),
     ]
 )
 class StudentProblem(
