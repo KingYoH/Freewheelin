@@ -20,5 +20,13 @@ class Piece(
     @JoinColumn(name = "`teacher_id`", nullable = false)
     var teacher: Member = teacher
         protected set
+
+    @OneToMany(mappedBy = "piece", cascade = [CascadeType.PERSIST])
+    val pieceProblems: MutableSet<PieceProblem> = mutableSetOf()
+    fun addProblem(problem: Problem) {
+        val pieceProblem = PieceProblem(piece = this, problem = problem)
+        pieceProblems.add(pieceProblem)
+        problem.pieceProblems.add(pieceProblem)
+    }
 }
 

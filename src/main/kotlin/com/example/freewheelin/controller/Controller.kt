@@ -32,12 +32,12 @@ class Controller(
 //            · 학습지 이름
 //            · 만든 유저 정보
 //     */
-//    @PostMapping("/piece")
-//    fun createPiece(
-//        @RequestBody request: CreatePieceDto.Request,
-//    ):CreatePieceDto.Response{
-//        return CreatePieceDto.Response()
-//    }
+    @PostMapping("/piece")
+    fun createPiece(
+        @RequestBody request: CreatePieceDto.Request,
+    ):BaseResponse<CreatePieceDto.Response>
+     = BaseResponse(data = service.createPiece(request))
+
 //    /* 3. 학생에게 학습지 출제하기
 //        - 선생님은 학생에게 2번 문제에서 생성했던 학습지 1개의 학습지를 출제합니다.
 //        - 선생님은 자신이 만든 학습지만 학생에게 출제가 가능합니다.

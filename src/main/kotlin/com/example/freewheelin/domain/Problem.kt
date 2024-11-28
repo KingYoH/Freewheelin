@@ -40,4 +40,7 @@ class Problem(
     @Column(name = "`answer`", nullable = false)
     var answer: String = answer
         protected set
+
+    @OneToMany(mappedBy = "problem", cascade = [CascadeType.PERSIST])
+    val pieceProblems: MutableSet<PieceProblem> = mutableSetOf()
 }
