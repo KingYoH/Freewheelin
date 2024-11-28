@@ -6,8 +6,8 @@ import jakarta.persistence.*
 @Table(
     name = "Piece_Student",
     indexes = [
-        Index(name = "idx_piece_student_piece_id", columnList = "piece_id"),
-        Index(name = "idx_piece_student_student_id", columnList = "student_id"),
+        Index(name = "idx_piece_student_piece_id", columnList = "`piece_id`"),
+        Index(name = "idx_piece_student_student_id", columnList = "`student_id`"),
     ]
 )
 class PieceStudent(

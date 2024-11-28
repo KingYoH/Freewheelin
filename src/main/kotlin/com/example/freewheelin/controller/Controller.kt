@@ -16,15 +16,15 @@ class Controller(
     /* 1. 문제 조회
         - 선생님은 총 문제 수, 유형코드 리스트, 난이도, 문제 유형(주관식, 객관식, 전체)을 조건으로 문제를 조회합니다.
      */
-//    @GetMapping("/problems")
-//    fun getProblems(
-//        @RequestParam totalCount: Int,
-//        @RequestParam unitCodeList: List<String>,
-//        @RequestParam level: PieceLevel,
-//        @RequestParam problemType: ProblemType
-//    ){
-//
-//    }
+    @GetMapping("/problems")
+    fun getProblems(
+        @RequestParam totalCount: Int,
+        @RequestParam unitCodeList: List<String>,
+        @RequestParam level: PieceLevel,
+        @RequestParam problemType: ProblemType
+    ){
+
+    }
 //
 //    /* 2. 학습지 생성
 //        - 선생님은 1번에서 조회했던 문제 리스트를 바탕으로 학습지를 생성합니다.
