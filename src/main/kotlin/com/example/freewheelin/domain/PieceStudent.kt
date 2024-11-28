@@ -15,20 +15,20 @@ class PieceStudent(
     student: Member,
 ):PrimaryKey() {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "piece_id", nullable = false)
+    @JoinColumn(name = "`piece_id`", nullable = false)
     var piece: Piece = piece
         protected set
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "`student_id`", nullable = false)
     var student: Member = student
         protected set
 
-    @Column(name = "attempt_count", nullable = false)
+    @Column(name = "`attempt_count`", nullable = false)
     var attemptCount: Int = 0
         protected set
 
-    @Column(name = "correct_count", nullable = false)
+    @Column(name = "`correct_count`", nullable = false)
     var correctCount: Int = 0
         protected set
 }

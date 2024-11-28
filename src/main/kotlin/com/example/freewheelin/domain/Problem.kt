@@ -12,8 +12,8 @@ import jakarta.validation.constraints.NotNull
 @Table(
     name = "Problem",
     indexes = [
-        Index(name = "idx_problem_level", columnList = "level"),
-        Index(name = "idx_problem_type", columnList = "type"),
+        Index(name = "idx_problem_level", columnList = "`level`"),
+        Index(name = "idx_problem_type", columnList = "`type`"),
     ]
 )
 class Problem(

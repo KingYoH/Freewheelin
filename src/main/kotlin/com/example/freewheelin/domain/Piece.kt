@@ -6,7 +6,7 @@ import jakarta.persistence.*
 @Entity
 @Table(
     name = "Piece",
-    indexes = [Index(name = "idx_piece_teacher_id", columnList = "teacher_id")]
+    indexes = [Index(name = "idx_piece_teacher_id", columnList = "`teacher_id`")]
 )
 class Piece(
     name: String,
@@ -17,7 +17,7 @@ class Piece(
         protected set
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacher_id", nullable = false)
+    @JoinColumn(name = "`teacher_id`", nullable = false)
     var teacher: Member = teacher
         protected set
 }

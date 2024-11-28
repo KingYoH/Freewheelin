@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @Entity
 @Table(
     name = "Member",
-    indexes = [Index(name = "idx_member_type", columnList = "type")]
+    indexes = [Index(name = "idx_member_type", columnList = "`type`")]
 )
 class Member(
     name: String,
