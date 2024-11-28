@@ -22,6 +22,7 @@ class SecurityConfig(
         .headers { it.frameOptions { frameOptions -> frameOptions.sameOrigin() } }
         .authorizeHttpRequests {
             it.requestMatchers(*allowedUrls).permitAll()
+                .requestMatchers("/problems").hasRole("TEACHER")
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .anyRequest().authenticated()
         }

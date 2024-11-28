@@ -1,17 +1,17 @@
 package com.example.freewheelin.controller
 
-import com.example.freewheelin.dto.AnalyzePieceDto
-import com.example.freewheelin.dto.CreatePieceDto
-import com.example.freewheelin.dto.GetPieceProblemsDto
-import com.example.freewheelin.dto.GradePieceDto
+import com.example.freewheelin.dto.*
+import com.example.freewheelin.dto.common.BaseResponse
 import com.example.freewheelin.enum.PieceLevel
 import com.example.freewheelin.enum.ProblemType
+import com.example.freewheelin.service.Service
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/")
 class Controller(
-//    private val teacherService:
+    private val service: Service,
 ) {
     /* 1. 문제 조회
         - 선생님은 총 문제 수, 유형코드 리스트, 난이도, 문제 유형(주관식, 객관식, 전체)을 조건으로 문제를 조회합니다.
@@ -22,9 +22,8 @@ class Controller(
         @RequestParam unitCodeList: List<String>,
         @RequestParam level: PieceLevel,
         @RequestParam problemType: ProblemType
-    ){
-
-    }
+    ): BaseResponse<GetProblemDto.Response>
+    = BaseResponse(data=service.getProblems(totalCount,unitCodeList,level, problemType))
 //
 //    /* 2. 학습지 생성
 //        - 선생님은 1번에서 조회했던 문제 리스트를 바탕으로 학습지를 생성합니다.
@@ -39,7 +38,6 @@ class Controller(
 //    ):CreatePieceDto.Response{
 //        return CreatePieceDto.Response()
 //    }
-//
 //    /* 3. 학생에게 학습지 출제하기
 //        - 선생님은 학생에게 2번 문제에서 생성했던 학습지 1개의 학습지를 출제합니다.
 //        - 선생님은 자신이 만든 학습지만 학생에게 출제가 가능합니다.
