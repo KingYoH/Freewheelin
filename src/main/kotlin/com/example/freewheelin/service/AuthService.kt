@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class AuthService(
@@ -39,5 +40,11 @@ class AuthService(
         val accessToken = jwtTokenProvider.generateToken(authentication)
 
         return SignInDto.Response(accessToken)
+    }
+
+    fun myInfo(id: Long): String {
+        val member = memberRepository.findMemberById(id)
+            ?: throw InvalidPropertiesFormatException("There is no user information for id $id")
+        return "${member.name} ( type : ${member.type} )"
     }
 }

@@ -35,7 +35,7 @@ class JwtTokenProvider(
             .claim("auth", auth)
             .claim("userId", userId)
             .setExpiration(Date.from(Instant.now().plus(this.accessTokenExpireTime, ChronoUnit.MINUTES)))
-            .signWith(this.secretKey, SignatureAlgorithm.HS512)
+            .signWith(this.secretKey, SignatureAlgorithm.HS256)
             .compact()
     }
 
