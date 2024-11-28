@@ -1,21 +1,22 @@
 package com.example.freewheelin.service
 
 
+import com.example.freewheelin.domain.Member
 import com.example.freewheelin.domain.Piece
-import com.example.freewheelin.domain.Problem
+import com.example.freewheelin.domain.PieceStudent
 import com.example.freewheelin.dto.CreatePieceDto
 import com.example.freewheelin.dto.GetProblemDto
+import com.example.freewheelin.dto.SubmitPieceDto
 import com.example.freewheelin.enum.PieceLevel
 import com.example.freewheelin.enum.ProblemLevel
 import com.example.freewheelin.enum.ProblemType
 import com.example.freewheelin.repository.MemberRepository
-import com.example.freewheelin.repository.PieceProblemRepository
 import com.example.freewheelin.repository.PieceRepository
+import com.example.freewheelin.repository.PieceStudentRepository
 import com.example.freewheelin.repository.ProblemRepository
 import com.example.freewheelin.security.CustomUser
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestParam
 import java.util.*
 
 @Service
@@ -23,7 +24,7 @@ class Service(
     private val memberRepository: MemberRepository,
     private val problemRepository: ProblemRepository,
     private val pieceRepository: PieceRepository,
-//    private val pieceProblemRepository: PieceProblemRepository
+    private val pieceStudentRepository: PieceStudentRepository,
 ) {
     fun getProblems(
         totalCount: Int,
@@ -53,10 +54,7 @@ class Service(
     fun createPiece(
         request: CreatePieceDto.Request
     ): CreatePieceDto.Response{
-        val userId = (SecurityContextHolder.getContext().authentication.principal as CustomUser).id
-        val user = memberRepository.findMemberById(userId)
-            ?: throw InvalidPropertiesFormatException("There is no user information for id $userId")
-
+        val user = getUser()
         val problems = problemRepository.findProblemsByIdIn(request.problems)
         val newPiece = Piece(request.pieceName, user)
         problems.forEach{ newPiece.addProblem(it) }
@@ -66,5 +64,32 @@ class Service(
             saved.name,
             problems.size,
         )
+    }
+
+    fun submitPiece(
+        pieceId: Long,
+        studentIds: List<Long>,
+    ): SubmitPieceDto.Response{
+        val user = getUser()
+        val piece = pieceRepository.findById(pieceId).orElseThrow { Exception("Piece not found") }
+        val students = memberRepository.findMembersByIdIn(studentIds)
+        val (already, notYet) = students.partition{stu->piece.id in stu.pieces.map{it.id}}
+        notYet.forEach{
+            val newPieceStudent = pieceStudentRepository.save(PieceStudent(piece, it))
+            piece.addStudent(newPieceStudent)
+            it.addPiece(newPieceStudent)
+            memberRepository.save(it)
+        }
+        pieceRepository.save(piece)
+        return SubmitPieceDto.Response(
+            notYet.map{it.id},
+            already.map{it.id},
+        )
+    }
+
+    private fun getUser(): Member{
+        val userId = (SecurityContextHolder.getContext().authentication.principal as CustomUser).id
+        return memberRepository.findMemberById(userId)
+            ?: throw InvalidPropertiesFormatException("There is no user information for id $userId")
     }
 }

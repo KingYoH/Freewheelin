@@ -45,13 +45,12 @@ class Controller(
 //        - 이미 존재하는 학습지를 부여받는 경우 에러로 간주하지 않습니다.
 //        - 만약 동시에 2명 이상의 학생에게 1개의 학습지를 출제하는데 이미 같은 학습지를 받은 경우가 있는 경우 이미 같은 학습지를 받은 학생을 제외하고 나머지 인원만 학습지를 받습니다.
 //     */
-//    @PostMapping("/pieces/{pieceId}")
-//    fun submitPiece(
-//        @PathVariable pieceId: Long,
-//        @RequestParam studentIds: List<Long>,
-//    ){
-//
-//    }
+    @PostMapping("/pieces/{pieceId}")
+    fun submitPiece(
+        @PathVariable pieceId: Long,
+        @RequestParam studentIds: List<Long>,
+    ):BaseResponse<SubmitPieceDto.Response>
+    = BaseResponse(data=service.submitPiece(pieceId, studentIds))
 //
 //    /* 4. 학습지의 문제 조회하기
 //        - 학생은 자신에게 출제된 학습지의 문제 목록을 확인할 수 있습니다.

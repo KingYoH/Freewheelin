@@ -3,6 +3,7 @@ package com.example.freewheelin.domain
 import com.example.freewheelin.enum.ProblemLevel
 import com.example.freewheelin.enum.ProblemType
 import com.example.freewheelin.validation.EnumValid
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
@@ -42,5 +43,6 @@ class Problem(
         protected set
 
     @OneToMany(mappedBy = "problem", cascade = [CascadeType.PERSIST])
+    @JsonIgnore
     val pieceProblems: MutableSet<PieceProblem> = mutableSetOf()
 }

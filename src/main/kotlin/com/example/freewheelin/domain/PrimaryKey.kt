@@ -1,5 +1,6 @@
 package com.example.freewheelin.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import org.hibernate.proxy.HibernateProxy
 import org.springframework.data.domain.Persistable
@@ -10,6 +11,7 @@ import kotlin.jvm.Transient
 @MappedSuperclass
 abstract class PrimaryKey : Persistable<Long> {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     @Column(name = "`id`", nullable = false, updatable = false)
     private val id: Long = 0L
     override fun getId(): Long = id

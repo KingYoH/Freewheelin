@@ -1,6 +1,7 @@
 package com.example.freewheelin.domain
 
 import com.example.freewheelin.enum.MemberType
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -25,4 +26,14 @@ class Member(
     @Column(name = "`type`", columnDefinition= "VARCHAR(7)",nullable = false)
     var type: String = memberType.name
         protected set
+
+    @OneToMany(mappedBy = "student", fetch = FetchType.EAGER)
+    @JsonIgnore
+    val pieceStudents: MutableSet<PieceStudent> = mutableSetOf()
+    fun addPiece(pieceStudent: PieceStudent) {
+        pieceStudents.add(pieceStudent)
+    }
+    @get:Transient
+    val pieces: List<Piece>
+        get() = pieceStudents.map { it.piece }
 }
