@@ -64,6 +64,9 @@ class Service(
     fun createPiece(
         request: CreatePieceDto.Request
     ): CreatePieceDto.Response{
+        if(request.problems.size>50){
+            throw Exception("문제 개수가 50개가 넘을 수 없습니다.")
+        }
         val user = getUser()
         val problems = problemRepository.findProblemsByIdIn(request.problems)
         val newPiece = Piece(request.pieceName, user)

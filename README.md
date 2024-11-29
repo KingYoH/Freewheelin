@@ -1,112 +1,136 @@
 # Recruitment task
+### 0. Auth 관련
+ - name(unique)과 password로 유저정보 생성 및 로그인.
+ - JWT 토큰 (Access-Token 헤더)
+```json
+# 예시
+### 회원가입
+POST {{host}}/auth/sign-up
+Content-Type: application/json
 
+{
+  "name": "teacher3",
+  "password": "1234",
+  "memberType": "TEACHER"  // "TEACHER" , "STUDENT"
+}
+
+### 로그인(teacher1)
+POST {{host}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "name": "teacher1",
+  "password": "1234"
+}
+```
 
 ### 1. `GET`  문제 조회
-
 - 선생님은 총 문제 수, 유형코드 리스트, 난이도, 문제 유형(주관식, 객관식, 전체)을 조건으로 문제를 조회합니다.
-- **파라미터 설명**
-  - 총 문제수 (totalCount)
-      - 총 문제 수는 최대 문제 수를 의미 하기도 합니다.
-      - 아래 조건을 활용해서 만들 수 있는 문제의 수가 파라미터로 전달받은 총 문제 수보다 적다면 총 문제 수보다 적어도 괜찮습니다.
-      - 아래 조건을 활용해서 만들 수 있는 문제의 수가 파라미터로 전달받은 총 문제 수보다 많다면 총 문제 수 만큼만 조회합니다.
-
-  - 유형 코드 리스트 (unitCodeList)
-      - 파라미터로 전달받은 유형코드 리스트에서만 문제를 조회합니다.
-
-  - 문제 유형 (problemType)
-      - 주관식, 객관식, 전체 총 3개 경우가 존재하며 전달받은 유형으로만 조회를 합니다.
-
-  - 난이도 (level)
-      - 파라미터로 받을 수 있는 난이도에는 **상, 중, 하** 3가지가 존재합니다.
-      - 문제에는 난이도가 1부터 5까지 존재하고 숫자가 클수록 어려운 문제입니다.
-      - 난이도 1 인 문제 - 하
-      - 난이도 2,3,4 인 문제 - 중
-      - 난이도 5 인 인 문제 - 상
-      - 난이도별 문제 비율은 아래- 와 같습니다. 전체 수는 파라미터로 받은 **총 문제 수**가 기준입니다.
-        - 파라미터로 전달받은 총문제 수를 아래 비율로 나눌 수 없는 경우 자유롭게 구현하시면 됩니다.
-          - 상 선택시 : **하** 문제 20%, **중** 문제 30%, **상** 문제 50%
-          - 중 선택시 : **하** 문제 25%, **중** 문제 50%, **상** 문제 25%
-          - 하 선택시 : **하** 문제 50%, **중** 문제 30%, **상** 문제 20%
-
-- 필터링 순서는 유형코드 리스트 → 문제 유형 → 난이도 로 해주시면 됩니다.
-```
-  # REQUEST
+- 클라이언트에서 에러처리를 원활하게 하기 위하여 resultCode와 message를 추가하고 data에 body를 담았습니다.
+```json
+  REQUEST
     * Query Params
        # totalCount : 총문제 수
        # unitCodeList : 유형코드 리스트
        # level : 난이도 (LOW, MIDDLE, HIGH)
        # problemType: 주관식, 객관식, 전체 (ALL, SUBJECTIVE, SELECTION)
-       
-  ex) 
-    http://localhost:8080/problems?totalCount=15&unitCodeList=a,b,c&level=HIGH&problemType=SELECTION
- 
-```
-```json
-  # RESPONSE
+  
+  RESPONSE
     ex)
     {
-        "problemList" : [
-            {
-                "id" : 1,
-                "answer" : "정답",
-                "unitCode" : "유형코드",
-                "level" : 1,
-                "problemType": "SELECTION",
-            },
-            {
-                "id" : 2,
-                "answer" : "정답",
-                "unitCode" : "유형코드",
-                "level" : 1,
-                "problemType": "SELECTION",
-            }
-        ...
-        ]
+        "resultCode": "Success", // 성공여부 / "Error"
+        "data : {
+                  "problemList" : [
+                              {
+                                  "id" : 1,
+                                  "answer" : "정답",
+                                  "unitCode" : "유형코드",
+                                  "level" : 1,
+                                  "problemType": "SELECTION",
+                              },
+                              {
+                                  "id" : 2,
+                                  "answer" : "정답",
+                                  "unitCode" : "유형코드",
+                                  "level" : 1,
+                                  "problemType": "SELECTION",
+                              }
+                          ...
+                          ]
+                  }
+        "message": "ok" // 메세지( 성공이면 ok, 아니면 error Message )
     }
+```
+```json
+  # 예시
+  GET {{host}}/problems?totalCount=15
+        &unitCodeList=uc1503,uc1506,uc1510,uc1513,uc1519,uc1520,uc1521,uc1523,uc1524,uc1526,uc1529&
+        &level=LOW&&problemType=ALL
+  Content-Type: application/json
+  Access-Token: {{accessToken}}
 ```
 
 ### 2. `POST`  학습지 생성
-
 - 선생님은 **1번에서 조회했던 문제 리스트**를 바탕으로 학습지를 생성합니다.
-- 학습지 생성 시 포함될 수 있는 최대 문제 수는 50개 입니다.
-- 학습지는 아래의 정보를 가지고 있습니다.
-    - 학습지 이름
-    - 만든 유저 정보
+
 - REQUEST
   ex ) http://localhost:8080/piece
-```
+```json
 REQUESTBODY
-    {
-    자유롭게 구현하시면 됩니다.
-    }
+  {
+    "pieceName" :  "학습지명"
+    "problems" :  ["문제번호1","문제번호2",..]
+  }
 
 RESPONSEBODY
-    {
-    자유롭게 구현하시면 됩니다.
-    }
+  {
+    "resultCode": "Success", // 성공여부 / "Error"
+    "data": {
+      "pieceId": 1, // 학습지Id
+      "pieceName": "peice1", // 학습지명
+      "problemCount": 10  // 포함되는 문제 개수
+    },
+    "message": "ok" // 메세지( 성공이면 ok, 아니면 error Message )
+  }
+```
+```json
+# 예시
+POST {{host}}/piece
+Content-Type: application/json
+Access-Token: {{accessToken}}
+
+{
+  "pieceName": "peice1",
+  "problems": [1532,1536,1535,1530,1538,1534,1539,1212,1331,1213]
+}
+
 ```
 
 
 
 ### 3. POST  학생에게 학습지 출제하기
 - 선생님은 학생에게 **2번 문제에서 생성했던 학습지** **1개의 학습지**를 출제합니다.
-- 선생님은 자신이 만든 학습지만 학생에게 출제가 가능합니다.
-- 학습지는 **동시에 2명이상의 학생에게** 출제가 가능합니다.
-- 이미 존재하는 학습지를 부여받는 경우 에러로 간주하지 않습니다.
-- 만약 동시에 2명 이상의 학생에게 1개의 학습지를 출제하는데 이미 같은 학습지를 받은 경우가 있는 경우 이미 같은 학습지를 받은 학생을 제외하고 나머지 인원만 학습지를 받습니다.
-```
+```json
 REQUEST
-   ex ) http://localhost:8080/piece/{pieceId}?studentIds=1,2
-
-REQUESTBODY
-{
-자유롭게 구현하시면 됩니다.
-}
-
+  * Path Param
+    # pieceId : 제출할 학습지Id
+  * Query Params
+    # studentIds: 제출할 학생Id 리스트
+        
 RESPONSEBODY
 {
-자유롭게 구현하시면 됩니다.
+    "resultCode": "Success", // 성공여부 / "Error"
+    "data": {
+        "sucess": [3, 4, 5], // 제출성공한 학생 ID
+        "alreadySubmitted": [] // 이미 제출되어있었던 학생 ID
+    },
+    "message": "ok" // 메세지( 성공이면 ok, 아니면 error Message )
 }
+```
+```json
+# 예시
+POST {{host}}/piece/1?studentIds=3,4,5
+Access-Token: {{accessToken}}
 ```
 
 ### 4. `GET` 학습지의 문제 조회하기
@@ -116,32 +140,88 @@ RESPONSEBODY
 - 클라이언트는 이 api를 바탕으로 문제풀이 화면을 구현합니다.
 ```json
 REQUEST
-ex ) http://localhost:8080/piece/problems?pieceId=1
+  * Query Params
+    # pieceId: 조회할 학습지Id
 
 RESPONSEBODY
-{
-	자유롭게 구현하시면 됩니다.
-}
-
+  {
+    "resultCode": "Success", // 성공여부 / "Error"
+    "data": {
+        "problems": [
+            {
+                "id": 1212, //문제Id
+                "unitCode": "uc1513", // 문제 유형코드
+                "unitCodeName": "세 개 이상 집합의 교집합", // 문제 유형 이름
+                "level": 3,   // 문제 난이도
+                "problemType": "SUBJECTIVE" // 문제 종류
+            },
+        ...
+        ]
+    },
+    "message": "ok" // 메세지( 성공이면 ok, 아니면 error Message )
+  }
+```
+```json
+# 예시
+GET {{host}}/piece/problems?pieceId=1
+Access-Token: {{accessToken}}
 ```
 
 ### 5. `PUT` 채점하기
-
 - 학생은 4번 문제에서 조회했던 문제들을 채점할 수 있습니다.
-- 문제는 2개이상 한번에 채점이 가능합니다.
-- 채점 결과는 맞음, 틀림 2가지가 존재합니다.
 ```json
 REQUEST
-ex ) http://localhost:8080/piece/problems?pieceId=1
-
-REQUESTBODY
 {
-	자유롭게 구현하시면 됩니다.
+  "answers": [
+    {
+      "problemId": 1212, //문제번호
+      "answer" : "1"  // 제출할 정답
+    },
+    {
+      "problemId": 1213,
+      "answer" : "2"
+    },
+    ...
+  ]
 }
 
 RESPONSEBODY
 {
-	자유롭게 구현하시면 됩니다.
+  "resultCode": "Success", // 성공여부 / "Error"
+  "data": {
+    "results": [
+      {
+        "problemId": 1212, // 문제번호
+        "correct": true   // 정답 여부
+      },
+      {
+        "problemId": 1213,
+        "correct": false
+      },
+      ...
+    ]
+  },
+  "message": "ok" // 메세지( 성공이면 ok, 아니면 error Message )
+}
+```
+```json
+# 예시
+### 1212 맞추고, 1213 틀림)
+PUT {{host}}/piece/problems?pieceId=1
+Content-Type: application/json
+Access-Token: {{accessToken}}
+
+{
+    "answers": [
+        {
+        "problemId": 1212,
+        "answer" : "1"
+        },
+        {
+        "problemId": 1213,
+        "answer" : "2"
+        }
+    ]
 }
 ```
 
@@ -158,16 +238,57 @@ RESPONSEBODY
     - 학습지의 문제별 정답률 (출제받은 학생들에 한에서)
 
 ```json
-
+```json
 REQUEST
-ex ) http://localhost:8080/piece/analyze?pieceId=1
+{
+  "answers": [
+    {
+      "problemId": 1212, //문제번호
+      "answer" : "1"  // 제출할 정답
+    },
+    {
+      "problemId": 1213,
+      "answer" : "2"
+    },
+    ...
+  ]
+}
 
 RESPONSEBODY
 {
-	자유롭게 구현하시면 됩니다.
+  "resultCode": "Success", // 성공여부 / "Error"
+  "data": {
+    "pieceId": 1,
+    "pieceName": "peice1",
+    "students": [
+      {
+        "id": 3, // 학생 Id
+        "name": "student1", // 학생 이름
+        "correctRate": 50.0 // 해당 학생의 학습지 정답률
+      },
+      ...
+    ],
+    "problems": [
+      {
+        "id": 1212,   // 문제 Id
+        "unitCode": "uc1513", // 문제 유형
+        "unitCodeName": "세 개 이상 집합의 교집합", // 문제 유형 이름
+        "level": 3, // 문제 난이도
+        "problemType": "SUBJECTIVE", // 문제 타입
+        "correctRate": 100.0 // 학습지에서 문제 정답률
+      },
+      ...
+    ]
+  },
+  "message": "ok" // 메세지( 성공이면 ok, 아니면 error Message )
 }
 ```
+```json
+# 예시
+GET {{host}}/piece/analyze?pieceId=1
+Access-Token: {{accessToken}}
 
+```
 ### ERD
 
 ![ERD](https://github.com/user-attachments/assets/82e93b42-1c25-4585-83de-8e8202ab4103)
