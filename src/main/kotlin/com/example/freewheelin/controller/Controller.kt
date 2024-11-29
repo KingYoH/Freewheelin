@@ -68,13 +68,12 @@ class Controller(
 //        - 문제는 2개이상 한번에 채점이 가능합니다.
 //        - 채점 결과는 맞음, 틀림 2가지가 존재합니다.
 //     */
-//    @PutMapping("/piece/problems")
-//    fun gradePiece(
-//        @RequestParam pieceId: Long,
-//        @RequestBody request: GradePieceDto.Request,
-//    ): GradePieceDto.Resposne{
-//        return GradePieceDto.Resposne()
-//    }
+    @PutMapping("/piece/problems")
+    fun gradePiece(
+        @RequestParam pieceId: Long,
+        @RequestBody request: GradePieceDto.Request,
+    ): BaseResponse<GradePieceDto.Response>
+    = BaseResponse(data=service.gradePiece(pieceId, request.answers))
 //
 //    /* 6. 학습지 학습 통계 분석하기
 //    - 선생님은 1개의 학습지에 대해 학생들의 학습 통계를 파악할 수 있습니다.

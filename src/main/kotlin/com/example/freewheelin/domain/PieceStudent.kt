@@ -1,5 +1,6 @@
 package com.example.freewheelin.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 
 @Entity
@@ -24,11 +25,18 @@ class PieceStudent(
     var student: Member = student
         protected set
 
+    @OneToMany(mappedBy = "pieceStudent", cascade = [CascadeType.PERSIST])
+    @JsonIgnore
+    val studentProblems: MutableSet<StudentProblem> = mutableSetOf()
+    fun addPieceProblem(pieceProblem: PieceProblem) {
+        val studentProblem = StudentProblem(this, pieceProblem)
+        studentProblems.add(studentProblem)
+        pieceProblem.studentProblems.add(studentProblem)
+    }
+
     @Column(name = "`attempt_count`", nullable = false)
     var attemptCount: Int = 0
-        protected set
 
     @Column(name = "`correct_count`", nullable = false)
     var correctCount: Int = 0
-        protected set
 }

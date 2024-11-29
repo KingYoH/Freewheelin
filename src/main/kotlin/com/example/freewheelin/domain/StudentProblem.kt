@@ -26,9 +26,7 @@ class StudentProblem(
 
     @Column(name = "`submit_answer`", nullable = true)
     var submitAnswer: String? = null
-        protected set
 
     @Column(name = "`is_correct`", nullable = true)
     var isCorrect: Boolean? = null
-        protected set
 }

@@ -70,3 +70,21 @@ Content-Type: application/json
 GET {{host}}/piece/problems?pieceId=1
 Access-Token: {{accessToken}}
 
+
+### 5. 채점하기 (1212 맞추고, 1213 틀림)
+PUT {{host}}/piece/problems?pieceId=1
+Content-Type: application/json
+Access-Token: {{accessToken}}
+
+{
+  "answers": [
+    {
+      "problemId": 1212,
+      "answer" : "1"
+    },
+    {
+      "problemId": 1213,
+      "answer" : "2"
+    }
+  ]
+}

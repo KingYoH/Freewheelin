@@ -4,10 +4,7 @@ package com.example.freewheelin.service
 import com.example.freewheelin.domain.Member
 import com.example.freewheelin.domain.Piece
 import com.example.freewheelin.domain.PieceStudent
-import com.example.freewheelin.dto.CreatePieceDto
-import com.example.freewheelin.dto.GetPieceProblemsDto
-import com.example.freewheelin.dto.GetProblemDto
-import com.example.freewheelin.dto.SubmitPieceDto
+import com.example.freewheelin.dto.*
 import com.example.freewheelin.enum.PieceLevel
 import com.example.freewheelin.enum.ProblemLevel
 import com.example.freewheelin.enum.ProblemType
@@ -24,6 +21,7 @@ class Service(
     private val pieceRepository: PieceRepository,
     private val pieceStudentRepository: PieceStudentRepository,
     private val unitCodeRepository: UnitCodeRepository,
+    private val studentProblemRepository: StudentProblemRepository,
 ) {
     fun getProblems(
         totalCount: Int,
@@ -74,13 +72,16 @@ class Service(
         val piece = pieceRepository.findById(pieceId).orElseThrow { Exception("Piece not found") }
         val students = memberRepository.findMembersByIdIn(studentIds)
         val (already, notYet) = students.partition{stu->piece.id in stu.pieces.map{it.id}}
-        notYet.forEach{
-            val newPieceStudent = pieceStudentRepository.save(PieceStudent(piece, it))
+        notYet.forEach{student->
+            val newPieceStudent = pieceStudentRepository.save(PieceStudent(piece, student))
+            piece.pieceProblems.forEach{ newPieceStudent.addPieceProblem(it) }
             piece.addStudent(newPieceStudent)
-            it.addPiece(newPieceStudent)
-            memberRepository.save(it)
+            student.addPiece(newPieceStudent)
+            memberRepository.save(student)
         }
         pieceRepository.save(piece)
+
+
         return SubmitPieceDto.Response(
             notYet.map{it.id},
             already.map{it.id},
@@ -90,7 +91,7 @@ class Service(
     fun getPieceProblems(pieceId: Long): GetPieceProblemsDto.Response{
         val user = getUser()
         val piece = user.pieces.find { it.id == pieceId }
-            ?:throw Exception("Piece(Id : $pieceId) is not a Piece given to the user(user : ${user.name})")
+            ?:throw Exception("Piece($pieceId) is not a Piece given to the user(${user.name})")
 
         return GetPieceProblemsDto.Response(
             piece.problems.map {problem->
@@ -103,6 +104,39 @@ class Service(
                 )
             }
         )
+    }
+
+    fun gradePiece(
+        pieceId: Long,
+        answerSheets: List<GradePieceDto.AnswerSheet>,
+    ): GradePieceDto.Response {
+        val user = getUser()
+        val pieceStudent = pieceStudentRepository.findPieceStudentByPieceIdAndStudentId(pieceId, user.id)
+            ?: throw Exception("Piece($pieceId) not found for User(${user.name})")
+        val studentProblems = pieceStudent.studentProblems
+            .filter{sp->sp.pieceProblem.problem.id in answerSheets.map{it.problemId}}
+            .sortedBy { it.pieceProblem.problem.id }
+        if(studentProblems.size != answerSheets.size){
+            throw Exception("There are Problems that are not included in the Piece(${pieceId})")
+        }
+        val results = mutableListOf<GradePieceDto.Result>()
+        studentProblems.zip(answerSheets.sortedBy{it.problemId}){sp, ans->
+            sp.submitAnswer = ans.answer
+            sp.isCorrect = (sp.pieceProblem.problem.answer==ans.answer)
+            pieceStudent.attemptCount +=1
+            if(sp.isCorrect==true){
+                pieceStudent.correctCount +=1
+            }
+            studentProblemRepository.save(sp)
+            results.add(
+                GradePieceDto.Result(
+                    ans.problemId,
+                    sp.isCorrect!!,
+                )
+            )
+        }
+        pieceStudentRepository.save(pieceStudent)
+        return GradePieceDto.Response(results.toList())
     }
 
     private fun getUser(): Member{
