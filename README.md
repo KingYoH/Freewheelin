@@ -170,4 +170,5 @@ RESPONSEBODY
 
 ### ERD
 
+![ERD](https://github.com/user-attachments/assets/82e93b42-1c25-4585-83de-8e8202ab4103)
 
