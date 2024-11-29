@@ -5,15 +5,13 @@ import com.example.freewheelin.domain.Member
 import com.example.freewheelin.domain.Piece
 import com.example.freewheelin.domain.PieceStudent
 import com.example.freewheelin.dto.CreatePieceDto
+import com.example.freewheelin.dto.GetPieceProblemsDto
 import com.example.freewheelin.dto.GetProblemDto
 import com.example.freewheelin.dto.SubmitPieceDto
 import com.example.freewheelin.enum.PieceLevel
 import com.example.freewheelin.enum.ProblemLevel
 import com.example.freewheelin.enum.ProblemType
-import com.example.freewheelin.repository.MemberRepository
-import com.example.freewheelin.repository.PieceRepository
-import com.example.freewheelin.repository.PieceStudentRepository
-import com.example.freewheelin.repository.ProblemRepository
+import com.example.freewheelin.repository.*
 import com.example.freewheelin.security.CustomUser
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -25,6 +23,7 @@ class Service(
     private val problemRepository: ProblemRepository,
     private val pieceRepository: PieceRepository,
     private val pieceStudentRepository: PieceStudentRepository,
+    private val unitCodeRepository: UnitCodeRepository,
 ) {
     fun getProblems(
         totalCount: Int,
@@ -33,10 +32,11 @@ class Service(
         problemType: ProblemType,
     ): GetProblemDto.Response{
         // unitCode와 problemType으로 필터
+        val unitCodes = unitCodeRepository.findUnitCodesByUnitCodeIn(unitCodeList)
         val problems = if(problemType!=ProblemType.ALL){
-            problemRepository.findProblemsByUnitCodeInAndType(unitCodeList, problemType.name)
+            problemRepository.findProblemsByUnitCodeInAndType(unitCodes, problemType.name)
         } else {
-            problemRepository.findProblemsByUnitCodeIn(unitCodeList)
+            problemRepository.findProblemsByUnitCodeIn(unitCodes)
         }
         // level으로 필터 ( 총 개수 보다 적어도 비율을 맞추게 )
         val lowProblems = problems.filter { it.level in ProblemLevel.LOW.values }.shuffled()
@@ -84,6 +84,24 @@ class Service(
         return SubmitPieceDto.Response(
             notYet.map{it.id},
             already.map{it.id},
+        )
+    }
+
+    fun getPieceProblems(pieceId: Long): GetPieceProblemsDto.Response{
+        val user = getUser()
+        val piece = user.pieces.find { it.id == pieceId }
+            ?:throw Exception("Piece(Id : $pieceId) is not a Piece given to the user(user : ${user.name})")
+
+        return GetPieceProblemsDto.Response(
+            piece.problems.map {problem->
+                GetPieceProblemsDto.ProblemContent(
+                    problem.id,
+                    problem.unitCode.unitCode,
+                    problem.unitCode.name,
+                    problem.level,
+                    problem.type,
+                )
+            }
         )
     }
 

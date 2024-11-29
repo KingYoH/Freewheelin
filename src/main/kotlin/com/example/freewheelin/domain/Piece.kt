@@ -30,6 +30,9 @@ class Piece(
         pieceProblems.add(pieceProblem)
         problem.pieceProblems.add(pieceProblem)
     }
+    @get:Transient
+    val problems: List<Problem>
+        get() = pieceProblems.map { it.problem }
 
     @OneToMany(mappedBy = "piece", fetch = FetchType.EAGER)
     @JsonIgnore

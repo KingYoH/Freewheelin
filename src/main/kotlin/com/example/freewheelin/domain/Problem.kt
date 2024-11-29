@@ -18,13 +18,14 @@ import jakarta.validation.constraints.NotNull
     ]
 )
 class Problem(
-    unitCode: String,
+    unitCode: UnitCode,
     level: Int,
     type: ProblemType,
     answer: String,
 ):PrimaryKey(){
-    @Column(name = "`unit_code`", nullable = false)
-    var unitCode: String = unitCode
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "`unit_code`", referencedColumnName = "`unit_code`", nullable = false)
+    var unitCode: UnitCode = unitCode
         protected set
 
     @Column(name = "`level`", nullable = false)

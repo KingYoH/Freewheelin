@@ -57,12 +57,11 @@ class Controller(
 //        - 학습지 1개에 대한 문제목록을 확인하는 것입니다.
 //        - 클라이언트는 이 api를 바탕으로 문제풀이 화면을 구현합니다.
 //     */
-//    @GetMapping("/piece/problems")
-//    fun getPieceProblems(
-//        @RequestParam pieceId: Long,
-//    ):GetPieceProblemsDto.Response{
-//        return GetPieceProblemsDto.Response()
-//    }
+    @GetMapping("/piece/problems")
+    fun getPieceProblems(
+        @RequestParam pieceId: Long,
+    ):BaseResponse<GetPieceProblemsDto.Response>
+    = BaseResponse(data=service.getPieceProblems(pieceId))
 //
 //    /* 5. 채점하기
 //        - 학생은 4번 문제에서 조회했던 문제들을 채점할 수 있습니다.

@@ -1,0 +1,72 @@
+### 회원가입
+POST {{host}}/auth/sign-up
+Content-Type: application/json
+
+{
+  "name": "teacher3",
+  "password": "1234",
+  "memberType": "TEACHER"
+}
+
+### 로그인(teacher1)
+POST {{host}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "name": "teacher1",
+  "password": "1234"
+}
+
+> {%
+    if (response.body && response.body.data.accessToken) {
+        client.global.set("accessToken", response.body.data.accessToken)
+    } else {
+        client.global.set("accessToken", "")
+    }
+%}
+
+### 문제 조회
+GET {{host}}/problems?
+    totalCount=15&
+    unitCodeList=uc1503,uc1506,uc1510,uc1513,uc1519,uc1520,uc1521,uc1523,uc1524,uc1526,uc1529&
+    level=LOW&
+    problemType=ALL
+Content-Type: application/json
+Access-Token: {{accessToken}}
+
+### 학습지 생성
+POST {{host}}/piece
+Content-Type: application/json
+Access-Token: {{accessToken}}
+
+{
+  "pieceName": "peice1",
+  "problems": [1532,1536,1535,1530,1538,1534,1539,1212,1331,1213]
+}
+
+### 학생에게 학습지 제출 student1,2,3
+POST {{host}}/pieces/1?
+    studentIds=3,4,5
+Access-Token: {{accessToken}}
+
+### 학생 로그인
+POST {{host}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "name": "student1",
+  "password": "1234"
+}
+
+> {%
+    if (response.body && response.body.data.accessToken) {
+        client.global.set("accessToken", response.body.data.accessToken)
+    } else {
+        client.global.set("accessToken", "")
+    }
+%}
+
+### 4. 학습지의 문제 조회하기
+GET {{host}}/piece/problems?pieceId=1
+Access-Token: {{accessToken}}
+

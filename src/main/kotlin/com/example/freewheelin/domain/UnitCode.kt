@@ -4,17 +4,17 @@ import jakarta.persistence.*
 
 @Entity
 @Table(
-    name = "UNIT_CODE",
+    name = "UNIT_CODE", uniqueConstraints = [UniqueConstraint(columnNames = ["`unit_code`"])]
 )
 class UnitCode(
-    unitName: String,
-    description: String,
+    unitCode: String,
+    name: String,
 ):PrimaryKey(){
-    @Column(name = "`unit_name`", nullable = false, unique = true)
-    var unitName: String = unitName
+    @Column(name = "`unit_code`", nullable = false)
+    var unitCode: String = unitCode
         protected set
 
-    @Column(name = "`description`", nullable = false)
-    var description: String = description
+    @Column(name = "`name`", nullable = false)
+    var name: String = name
         protected set
 }
