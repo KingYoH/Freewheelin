@@ -1,4 +1,5 @@
 # Recruitment task
+
 ### 0. Auth 관련
  - name(unique)과 password로 유저정보 생성 및 로그인.
  - JWT 토큰 (Access-Token 헤더)
@@ -289,7 +290,18 @@ GET {{host}}/piece/analyze?pieceId=1
 Access-Token: {{accessToken}}
 
 ```
+
 ### ERD
 
 ![ERD](https://github.com/user-attachments/assets/82e93b42-1c25-4585-83de-8e8202ab4103)
 
+### 논의
+- 통계를 조회하기 편하게 하기 위해서, 테이블끼리 다대다 연결이 아니라 
+중간 테이블을 만들어서 사용하였습니다. 불필요한 조인을 줄이고 빠른 통계를 낼 수 있었습니다.
+
+...
+### api 실행 테스트 
+src/main/http-test/test.http
+
+## 테스트코드 
+ - 미완성
