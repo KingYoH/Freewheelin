@@ -45,7 +45,7 @@ class Controller(
 //        - 이미 존재하는 학습지를 부여받는 경우 에러로 간주하지 않습니다.
 //        - 만약 동시에 2명 이상의 학생에게 1개의 학습지를 출제하는데 이미 같은 학습지를 받은 경우가 있는 경우 이미 같은 학습지를 받은 학생을 제외하고 나머지 인원만 학습지를 받습니다.
 //     */
-    @PostMapping("/pieces/{pieceId}")
+    @PostMapping("/piece/{pieceId}")
     fun submitPiece(
         @PathVariable pieceId: Long,
         @RequestParam studentIds: List<Long>,
@@ -85,10 +85,9 @@ class Controller(
 //        · 학생들의 학습 데이터 - 학생 개별의 학습지 정답률
 //        · 학습지의 문제별 정답률 (출제받은 학생들에 한에서)
 //     */
-//    @GetMapping("/pieces/analyze")
-//    fun analyzePiece(
-//        @RequestParam pieceId: Long,
-//    ): AnalyzePieceDto.Response{
-//        return AnalyzePieceDto.Response()
-//    }
+    @GetMapping("/piece/analyze")
+    fun analyzePiece(
+        @RequestParam pieceId: Long,
+    ): BaseResponse<AnalyzePieceDto.Response>
+    = BaseResponse(data = service.analyzePiece(pieceId))
 }

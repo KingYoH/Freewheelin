@@ -28,4 +28,10 @@ class PieceProblem(
     @OneToMany(mappedBy = "pieceProblem", cascade = [CascadeType.PERSIST])
     @JsonIgnore
     val studentProblems: MutableSet<StudentProblem> = mutableSetOf()
+
+    @Column(name = "`attempt_count`", nullable = false)
+    var attemptCount: Int = 0
+
+    @Column(name = "`correct_count`", nullable = false)
+    var correctCount: Int = 0
 }

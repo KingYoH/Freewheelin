@@ -5,6 +5,7 @@ import com.example.freewheelin.domain.Member
 import com.example.freewheelin.domain.Piece
 import com.example.freewheelin.domain.PieceStudent
 import com.example.freewheelin.dto.*
+import com.example.freewheelin.dto.GetProblemDto.ProblemInfo
 import com.example.freewheelin.enum.PieceLevel
 import com.example.freewheelin.enum.ProblemLevel
 import com.example.freewheelin.enum.ProblemType
@@ -22,6 +23,7 @@ class Service(
     private val pieceStudentRepository: PieceStudentRepository,
     private val unitCodeRepository: UnitCodeRepository,
     private val studentProblemRepository: StudentProblemRepository,
+    private val pieceProblemRepository: PieceProblemRepository,
 ) {
     fun getProblems(
         totalCount: Int,
@@ -46,7 +48,17 @@ class Service(
         // 나머지
         val remainProblems = (lowProblems.drop(low.size) + midProblems.drop(mid.size) + highProblems.drop(high.size)).shuffled()
         val remain = remainProblems.take(totalCount - low.size - mid.size - high.size)
-        return GetProblemDto.Response(low+mid+high+remain)
+        return GetProblemDto.Response(
+            (low+mid+high+remain).map{
+                GetProblemDto.ProblemInfo(
+                    it.id,
+                    it.answer,
+                    it.unitCode.unitCode,
+                    it.level,
+                    it.type
+                )
+            }
+        )
     }
 
     fun createPiece(
@@ -123,10 +135,13 @@ class Service(
         studentProblems.zip(answerSheets.sortedBy{it.problemId}){sp, ans->
             sp.submitAnswer = ans.answer
             sp.isCorrect = (sp.pieceProblem.problem.answer==ans.answer)
+            sp.pieceProblem.attemptCount+=1
             pieceStudent.attemptCount +=1
             if(sp.isCorrect==true){
+                sp.pieceProblem.correctCount +=1
                 pieceStudent.correctCount +=1
             }
+            pieceProblemRepository.save(sp.pieceProblem)
             studentProblemRepository.save(sp)
             results.add(
                 GradePieceDto.Result(
@@ -137,6 +152,40 @@ class Service(
         }
         pieceStudentRepository.save(pieceStudent)
         return GradePieceDto.Response(results.toList())
+    }
+
+    fun analyzePiece(pieceId: Long):AnalyzePieceDto.Response {
+        val user = getUser()
+        val piece = pieceRepository.findById(pieceId).orElseThrow { Exception("Piece not found") }
+        if(user.id != piece.teacher.id){
+            throw Exception("User(${user.name}) does not have permission to the piece(${pieceId}")
+        }
+
+        val studentInfos: List<AnalyzePieceDto.StudentInfo> = piece.pieceStudents.map {ps->
+            AnalyzePieceDto.StudentInfo(
+                ps.student.id,
+                ps.student.name,
+                (ps.correctCount.toDouble()/ps.attemptCount)*100
+            )
+        }
+
+        val problemInfos: List<AnalyzePieceDto.ProblemInfo> = piece.pieceProblems.map{pp->
+            AnalyzePieceDto.ProblemInfo(
+                pp.problem.id,
+                pp.problem.unitCode.unitCode,
+                pp.problem.unitCode.name,
+                pp.problem.level,
+                pp.problem.type,
+                (pp.correctCount.toDouble()/pp.attemptCount)*100
+            )
+        }
+
+        return AnalyzePieceDto.Response(
+            pieceId = pieceId,
+            pieceName = piece.name,
+            students = studentInfos,
+            problems = problemInfos
+        )
     }
 
     private fun getUser(): Member{

@@ -45,7 +45,7 @@ Access-Token: {{accessToken}}
 }
 
 ### 학생에게 학습지 제출 student1,2,3
-POST {{host}}/pieces/1?
+POST {{host}}/piece/1?
     studentIds=3,4,5
 Access-Token: {{accessToken}}
 
@@ -88,3 +88,98 @@ Access-Token: {{accessToken}}
     }
   ]
 }
+
+### 다른 학생들 로그인 후 채점 (student2 : 1212맞춤, 1213틀림 // student3 : 1212틀림 , 1213 맞춤)
+### student2
+POST {{host}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "name": "student2",
+  "password": "1234"
+}
+
+> {%
+    if (response.body && response.body.data.accessToken) {
+        client.global.set("accessToken", response.body.data.accessToken)
+    } else {
+        client.global.set("accessToken", "")
+    }
+%}
+###
+PUT {{host}}/piece/problems?pieceId=1
+Content-Type: application/json
+Access-Token: {{accessToken}}
+
+{
+  "answers": [
+    {
+      "problemId": 1212,
+      "answer" : "1"
+    },
+    {
+      "problemId": 1213,
+      "answer" : "2"
+    }
+  ]
+}
+### student3
+POST {{host}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "name": "student3",
+  "password": "1234"
+}
+
+> {%
+    if (response.body && response.body.data.accessToken) {
+        client.global.set("accessToken", response.body.data.accessToken)
+    } else {
+        client.global.set("accessToken", "")
+    }
+%}
+###
+PUT {{host}}/piece/problems?pieceId=1
+Content-Type: application/json
+Access-Token: {{accessToken}}
+
+{
+  "answers": [
+    {
+      "problemId": 1212,
+      "answer" : "2"
+    },
+    {
+      "problemId": 1213,
+      "answer" : "1"
+    }
+  ]
+}
+
+
+####
+### 선생님 로그인
+POST {{host}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "name": "teacher1",
+  "password": "1234"
+}
+
+> {%
+    if (response.body && response.body.data.accessToken) {
+        client.global.set("accessToken", response.body.data.accessToken)
+    } else {
+        client.global.set("accessToken", "")
+    }
+%}
+
+
+
+### 6. 학습지 학습 통계 분석하기
+GET {{host}}/piece/analyze?pieceId=1
+Access-Token: {{accessToken}}
+
+###
